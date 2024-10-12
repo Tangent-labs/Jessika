@@ -8,10 +8,8 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import useWallet from '../../hooks/useWallet';
 import CheckboxList from '../CheckboxList';
 import { useContext, useMemo, useState } from 'react';
-import ComboboxTokens from '../ComboboxTokens';
 import { WalletContext } from '../../context/WalletContext';
 import { claimStakeDaoBribes } from '../../services/claimStakeDaoBribes';
 import { Input } from '@/components/ui/input';
@@ -34,7 +32,7 @@ export default function BribesClaiming({ className }: { className: string }) {
 
     function updateToggleBribes(key: string) {
         const index = bribesToClaim.findIndex((bribe) => bribe.key === key);
-        let copy = [...bribesToClaim];
+        const copy = [...bribesToClaim];
         copy[index].checked = !copy[index].checked;
         setBribesToClaim(copy);
     }

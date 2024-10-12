@@ -1,7 +1,6 @@
 import { isAddress, Provider } from 'ethers';
 import { Signer } from 'ethers';
 import { Contract } from 'ethers';
-import { ethers } from 'ethers';
 import { SymbolAddress } from '../containers/Bribes/BribesClaiming';
 
 export async function checkConvexInput(
@@ -41,6 +40,7 @@ export async function checkConvexInput(
     try {
         symbol = await erc20.symbol();
     } catch (error) {
+        console.log(error);
         return { isValid: false, reason: "L'adresse c'est pas un ERC20" };
     }
 

@@ -1,12 +1,7 @@
 'use client';
-import { useContext, useEffect } from 'react';
 import CyclePassage from './containers/Cycle/CyclePassage';
 import BribesClaiming from './containers/Bribes/BribesClaiming';
-import {
-    useWallet,
-    WalletContext,
-    WalletProvider,
-} from './context/WalletContext';
+import { WalletProvider } from './context/WalletContext';
 import NavBar from './containers/NavBar';
 
 export default function Home() {
