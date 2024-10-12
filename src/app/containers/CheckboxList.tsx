@@ -12,7 +12,7 @@ export default function CheckboxList({
 }: {
     className?: string;
     list: KeyDisplayKey[];
-    onClick: any;
+    onClick: (item: string) => void;
 }) {
     return list.map((item) => (
         <div

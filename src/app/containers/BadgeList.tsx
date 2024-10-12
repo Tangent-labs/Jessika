@@ -6,5 +6,5 @@ export default function BadgeList({
     className?: string;
     list: string[];
 }) {
-    return list.map((item) => <Badge>{item}</Badge>);
+    return list.map((item) => <Badge key={item}>{item}</Badge>);
 }
