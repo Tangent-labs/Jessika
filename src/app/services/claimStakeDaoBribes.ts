@@ -51,7 +51,7 @@ const abi = [
 export async function claimStakeDaoBribes(signer: Signer | null) {
     const lastMerkle = await (
         await fetch(
-            'https://raw.githubusercontent.com/stake-dao/bounties-report/blob/main/bounties-reports/latest/merkle.json'
+            'https://raw.githubusercontent.com/stake-dao/bounties-report/refs/heads/main/bounties-reports/latest/merkle.json'
         )
     ).json();
     const dataClaim: DataClaim[] = [];
