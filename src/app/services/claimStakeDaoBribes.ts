@@ -57,18 +57,20 @@ export async function claimStakeDaoBribes(signer: Signer | null) {
     const dataClaim: DataClaim[] = [];
     for (const rewardData of lastMerkle) {
         const addressReward = rewardData.address;
-        const blackHoleRewardsData = rewardData.merkle[sdtBlackHole];
+        if (addressReward !== '0x5Ea630e00D6eE438d3deA1556A110359ACdc10A9') {
+            const blackHoleRewardsData = rewardData.merkle[sdtBlackHole];
 
-        const indexReward = blackHoleRewardsData?.index;
-        const amountReward = blackHoleRewardsData?.amount;
-        const proofReward = blackHoleRewardsData?.proof;
-        if (blackHoleRewardsData) {
-            dataClaim.push({
-                token: addressReward,
-                index: indexReward!,
-                amount: toBigInt(amountReward!.hex).toString(),
-                merkleProof: proofReward!,
-            });
+            const indexReward = blackHoleRewardsData?.index;
+            const amountReward = blackHoleRewardsData?.amount;
+            const proofReward = blackHoleRewardsData?.proof;
+            if (blackHoleRewardsData) {
+                dataClaim.push({
+                    token: addressReward,
+                    index: indexReward!,
+                    amount: toBigInt(amountReward!.hex).toString(),
+                    merkleProof: proofReward!,
+                });
+            }
         }
     }
 

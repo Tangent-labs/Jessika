@@ -10,9 +10,10 @@ import {
 } from '@/components/ui/card';
 import { triggerCycleNoRewardProcessing } from '../../services/cycleTriggering';
 import CheckboxList from '../CheckboxList';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { cycleTriggeringAndHarvesting } from '../../services/cycleTriggeringAndHarvesting';
 import { WalletContext } from '../../context/WalletContext';
+import { getLastEventsLiquidboost } from '@/app/services/lastDistributedRewards';
 
 export default function CyclePassage({ className }: { className: string }) {
     const [stakingToProcess, setStakingToProcess] = useState([
@@ -41,7 +42,27 @@ export default function CyclePassage({ className }: { className: string }) {
             displayKey: 'sdBAL',
             checked: true,
         },
+        {
+            key: '0x2c1D293c50C6d1a4370ebb442A02c5956bbAb119'.toLowerCase(),
+            displayKey: 'cvgCVX',
+            checked: true,
+        },
     ]);
+
+    const [lastRewards, setLastRewards] = useState(
+        {} as {
+            tokenDistributed: {
+                staking: string;
+                rewards: {
+                    name: string;
+                    amount: number;
+                    amountUsd?: number;
+                    address: string;
+                }[];
+            }[];
+            totalUSD: number;
+        }
+    );
     const stakingAddressesToProcess = stakingToProcess
         .filter((staking) => staking.checked)
         .map((staking) => staking.key);
@@ -54,29 +75,20 @@ export default function CyclePassage({ className }: { className: string }) {
         copy[index].checked = !copy[index].checked;
         setStakingToProcess(copy);
     }
+    const { signer, provider } = useContext(WalletContext);
 
-    const { signer } = useContext(WalletContext);
+    useEffect(() => {
+        if (provider) {
+            getLastEventsLiquidboost(provider).then((a) => {
+                setLastRewards(a);
+            });
+        }
+    }, [provider !== null]);
 
     return (
         <div className={className}>
             <div className="text-4xl text-center mb-5">Cycle passage</div>
             <div className=" grid grid-cols-2 gap-12">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Cycle Triggering</CardTitle>
-                        <CardDescription>Card Description</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Button
-                            variant="outline"
-                            onClick={() =>
-                                triggerCycleNoRewardProcessing(signer)
-                            }
-                        >
-                            Pass Cycle
-                        </Button>
-                    </CardContent>
-                </Card>
                 <Card>
                     <CardHeader>
                         <CardTitle>
@@ -102,6 +114,60 @@ export default function CyclePassage({ className }: { className: string }) {
                         >
                             Pass Cycle & Process Rewards
                         </Button>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Last distribution</CardTitle>
+                        <CardDescription>
+                            List of rewards distributed on last cycle
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <h1 className="text-lg font-bold ">
+                            Total : ${lastRewards?.totalUSD?.toFixed()}
+                        </h1>
+                        {lastRewards?.tokenDistributed?.map((pool, i) => (
+                            <div
+                                key={i}
+                                className="border p-4 rounded-2xl shadow-sm bg-white"
+                            >
+                                <h2 className="text-lg font-bold mb-3">
+                                    {pool.staking}
+                                </h2>
+
+                                <div className="grid gap-3">
+                                    {pool.rewards.map((reward, j) => (
+                                        <div
+                                            key={j}
+                                            className="flex justify-between items-center p-3 rounded-xl bg-gray-50"
+                                        >
+                                            <div>
+                                                <p className="font-medium">
+                                                    {reward.name}
+                                                </p>
+                                                <p className="text-sm text-gray-500">
+                                                    {reward.address}
+                                                </p>
+                                            </div>
+
+                                            <div className="text-right">
+                                                {reward.amountUsd && (
+                                                    <p className="font-semibold">
+                                                        $
+                                                        {reward.amountUsd.toFixed()}
+                                                    </p>
+                                                )}
+                                                <p className=" text-sm text-gray-500">
+                                                    {reward.amount.toFixed(2)}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
                     </CardContent>
                 </Card>
             </div>

@@ -14,6 +14,7 @@ import { BrowserProvider } from 'ethers';
 export const WalletContext = createContext<WalletContextType>({
     wallet: null,
     signer: null,
+    provider: null,
     connectWallet() {},
     disconnectWallet() {},
 });
@@ -21,6 +22,7 @@ export const WalletContext = createContext<WalletContextType>({
 interface WalletContextType {
     wallet: WalletState | null;
     signer: Signer | null;
+    provider: BrowserProvider | null;
     connectWallet: () => void;
     disconnectWallet: () => void;
 }
@@ -29,19 +31,19 @@ interface WalletContextType {
 export const WalletProvider = ({ children }: { children: ReactNode }) => {
     const [wallet, setWallet] = useState<WalletState | null>(null);
     const [signer, setSigner] = useState<Signer | null>(null);
-
+    const [provider, setProvider] = useState<BrowserProvider | null>(null);
     useEffect(() => {
         connectWallet();
     }, []);
 
     const connectWallet = async () => {
         const wallets = await onboard.connectWallet();
-        console.log('en coule');
         if (wallets.length > 0) {
             setWallet(wallets[0]);
             const ethersProvider = new BrowserProvider(wallets[0]!.provider);
             const signer = await ethersProvider.getSigner();
             setSigner(signer);
+            setProvider(ethersProvider);
         }
     };
 
@@ -52,6 +54,7 @@ export const WalletProvider = ({ children }: { children: ReactNode }) => {
     const returned = {
         wallet,
         signer,
+        provider,
         connectWallet,
         disconnectWallet,
     };

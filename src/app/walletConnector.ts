@@ -1,7 +1,6 @@
 import Onboard from '@web3-onboard/core';
 import injectedModule from '@web3-onboard/injected-wallets';
-import { Provider } from 'ethers';
-const MAINNET_RPC_URL = 'https://rpc.ankr.com/eth';
+const MAINNET_RPC_URL = 'https://rpc.flashbots.net/fast';
 
 export const wallets = [injectedModule()];
 export const onboard = Onboard({
@@ -19,10 +18,3 @@ export const onboard = Onboard({
     },
     //   appMetadata
 });
-export let provider: Provider;
-export async function connectedWallets() {
-    const wallet = await onboard.connectWallet();
-    provider = wallet[0].provider as unknown as Provider;
-
-    return wallet[0];
-}
