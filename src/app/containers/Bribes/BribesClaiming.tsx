@@ -60,7 +60,6 @@ export default function BribesClaiming({ className }: { className: string }) {
             inputConvexClaim,
             allConvexBribesToClaim
         );
-        console.log(isValid, erc20, reason);
         if (isValid) {
             setAllConvexBribesToClaim([
                 ...allConvexBribesToClaim,

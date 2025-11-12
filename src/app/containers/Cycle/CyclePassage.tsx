@@ -8,7 +8,6 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { triggerCycleNoRewardProcessing } from '../../services/cycleTriggering';
 import CheckboxList from '../CheckboxList';
 import { useContext, useEffect, useState } from 'react';
 import { cycleTriggeringAndHarvesting } from '../../services/cycleTriggeringAndHarvesting';

@@ -26,9 +26,7 @@ export async function getLastEventsLiquidboost(provider: BrowserProvider) {
         promises.push(fetch(url))
     })
 
-
     SD_STAKINGS.push({ displayKey: "cvgCVX", key: "" })
-
 
     const responses = await Promise.all(promises)
 
@@ -37,7 +35,6 @@ export async function getLastEventsLiquidboost(provider: BrowserProvider) {
     const respCvgCVX = await fetch(`https://api.etherscan.io/v2/api?chainid=1&module=logs&action=getLogs&address=${cvgCVX_STAKING.key}&fromBlock=${fromBlock}&toBlock=${toBlock}&page=1&offset=1000&apikey=${ETHERSCAN_API}`)
 
     responses.push(respCvgCVX)
-
 
     const tokenDistributed: { staking: string, rewards: { name: string, amount: number, amountUsd?: number, address: string }[] }[] = []
     const iface = new Interface(abi);
