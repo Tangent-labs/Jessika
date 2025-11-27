@@ -18,19 +18,22 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function getLastEventsLiquidboost(provider: BrowserProvider) {
     const toBlock = (await provider.getBlock("latest")!)!.number
-    const fromBlock = toBlock - 50_000;
+    const fromBlock = toBlock - 20_000;
 
     const promises: Promise<Response>[] = []
-    SD_STAKINGS.forEach(staking => {
+
+    for (let index = 0; index < SD_STAKINGS.length; index++) {
+        const staking = SD_STAKINGS[index]
         const url = `https://api.etherscan.io/v2/api?chainid=1&module=logs&action=getLogs&address=${staking.key}&fromBlock=${fromBlock}&toBlock=${toBlock}&page=1&offset=1000&apikey=${ETHERSCAN_API}`
+
+        await wait(500)
         promises.push(fetch(url))
-    })
+    }
+
 
     SD_STAKINGS.push({ displayKey: "cvgCVX", key: "" })
 
     const responses = await Promise.all(promises)
-
-    await wait(1_000)
 
     const respCvgCVX = await fetch(`https://api.etherscan.io/v2/api?chainid=1&module=logs&action=getLogs&address=${cvgCVX_STAKING.key}&fromBlock=${fromBlock}&toBlock=${toBlock}&page=1&offset=1000&apikey=${ETHERSCAN_API}`)
 
