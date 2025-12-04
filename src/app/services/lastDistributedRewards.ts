@@ -91,7 +91,7 @@ export async function getLastEventsLiquidboost(provider: BrowserProvider) {
 
 
     const pricesDeFiLlama = await (await fetch(`https://coins.llama.fi/prices/current/${allRewards.map(a => "ethereum:" + a).join(",")}`)).json()
-    const pricesCvg = await (await fetch(`https://api.cvg.finance/asset-prices/0x5af15da84a4a6edf2d9fa6720de921e1026e37b7,0x3E8C72655e48591d93e6dfdA16823dB0fF23d859`)).json()
+    const pricesCvg = await (await fetch(`https://api.cvg.finance/asset-prices/0x5af15da84a4a6edf2d9fa6720de921e1026e37b7,0x3E8C72655e48591d93e6dfdA16823dB0fF23d859,0xbcfE5c47129253C6B8a9A00565B3358b488D42E0`)).json()
     let totalUSD = 0
     tokenDistributed.forEach(staking => {
         staking.rewards.forEach(r => {
@@ -104,6 +104,10 @@ export async function getLastEventsLiquidboost(provider: BrowserProvider) {
             // sdBAL
             else if (r.address.toLowerCase() === "0xf24d8651578a55b0c119b9910759a351a3458895".toLowerCase()) {
                 price = pricesCvg["0x3E8C72655e48591d93e6dfdA16823dB0fF23d859"]
+            }
+            // sdFXN
+            else if (r.address.toLowerCase() === "0xe19d1c837b8a1c83a56cd9165b2c0256d39653ad".toLowerCase()) {
+                price = pricesCvg["0xbcfE5c47129253C6B8a9A00565B3358b488D42E0"]
             }
             r.amountUsd = r.amount * price
             totalUSD += r.amountUsd
