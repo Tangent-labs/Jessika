@@ -43,6 +43,10 @@ export const REWARDS: { [token: string]: { name: string, decimals?: number } } =
     ["0x830614aE209FF9d8706d386fcdBc7a55206fcffC".toLowerCase()]: {
         name: "cvgSDT",
     },
+
+    ["0x999999999991e178d52cd95afd4b00d066664144".toLowerCase()]: {
+        name: "sPENDLE",
+    },
     ["0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48".toLowerCase()]: {
         name: "USDC",
         decimals: 6
