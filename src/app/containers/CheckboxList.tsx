@@ -1,6 +1,6 @@
 import { Checkbox } from '@/components/ui/checkbox';
-export type KeyDisplayKey = {
-    sdToken: string;
+export type AddressDisplayKeyChecked = {
+    address: string;
     displayKey: string;
     checked: boolean;
 };
@@ -11,20 +11,20 @@ export default function CheckboxList({
     onClick,
 }: {
     className?: string;
-    list: KeyDisplayKey[];
+    list: AddressDisplayKeyChecked[];
     onClick: (item: string) => void;
 }) {
     return list.map((item) => (
         <div
-            key={item.sdToken}
+            key={item.address}
             className={'flex items-center space-x-2 ' + className}
         >
             <Checkbox
-                id={item.sdToken}
+                id={item.address}
                 checked={item.checked}
-                onClick={() => onClick(item.sdToken)}
+                onClick={() => onClick(item.address)}
             />
-            <label htmlFor={item.sdToken} className="text-sm font-medium">
+            <label htmlFor={item.address} className="text-sm font-medium">
                 {item.displayKey}
             </label>
         </div>

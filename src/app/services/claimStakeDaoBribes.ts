@@ -1,5 +1,5 @@
 import { Signer, Contract, toBigInt } from 'ethers';
-import { KeyDisplayKey } from '../containers/CheckboxList';
+import { AddressDisplayKeyChecked } from '../containers/CheckboxList';
 
 const sdtBlackHole = '0x21777106355ba506a31ff7984c0ae5c924deb77f';
 const multiMerkleStash = '0x03E34b085C52985F6a5D27243F20C84bDdc01Db4';
@@ -49,7 +49,7 @@ const abi = [
         type: 'function',
     },
 ];
-export async function claimStakeDaoBribes(signer: Signer | null, sdTokenToClaim: KeyDisplayKey[]) {
+export async function claimStakeDaoBribes(signer: Signer | null, sdTokenToClaim: AddressDisplayKeyChecked[]) {
     const lastMerkle = await (
         await fetch(
             'https://raw.githubusercontent.com/stake-dao/bounties-report/refs/heads/main/bounties-reports/latest/merkle.json'
@@ -58,7 +58,7 @@ export async function claimStakeDaoBribes(signer: Signer | null, sdTokenToClaim:
     const dataClaim: DataClaim[] = [];
 
 
-    const sdTokensToClaim = sdTokenToClaim.filter(s => s.checked).map(staking => staking.sdToken)
+    const sdTokensToClaim = sdTokenToClaim.filter(s => s.checked).map(staking => staking.address)
     for (const rewardData of lastMerkle) {
         const addressReward = rewardData.address;
         const blackHoleRewardsData = rewardData.merkle[sdtBlackHole];
@@ -68,7 +68,6 @@ export async function claimStakeDaoBribes(signer: Signer | null, sdTokenToClaim:
         const proofReward = blackHoleRewardsData?.proof;
         if (blackHoleRewardsData) {
             if (sdTokensToClaim.includes(addressReward)) {
-                console.log(sdTokensToClaim)
                 dataClaim.push({
                     token: addressReward,
                     index: indexReward!,
