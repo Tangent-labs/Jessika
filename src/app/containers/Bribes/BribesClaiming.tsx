@@ -24,14 +24,32 @@ export default function BribesClaiming({ className }: { className: string }) {
     const { signer } = useContext(WalletContext);
 
     const [bribesToClaim, setBribesToClaim] = useState([
-        { key: 'sdCRV', displayKey: 'sdCRV', checked: true },
-        { key: 'sdPENDLE', displayKey: 'sdPENDLE', checked: true },
-        { key: 'sdFXN', displayKey: 'sdFXN', checked: true },
-        { key: 'sdBAL', displayKey: 'sdBAL', checked: true },
+        {
+            sdToken: '0xD1b5651E55D4CeeD36251c61c50C889B36F6abB5',
+            displayKey: 'sdCRV',
+            checked: true,
+        },
+        {
+            sdToken: '0x5Ea630e00D6eE438d3deA1556A110359ACdc10A9',
+            displayKey: 'sdPENDLE',
+            checked: true,
+        },
+        {
+            sdToken: '0xe19d1c837B8A1C83A56cD9165b2c0256D39653aD',
+            displayKey: 'sdFXN',
+            checked: true,
+        },
+        {
+            sdToken: '0xF24d8651578a55b0C119B9910759a351A3458895',
+            displayKey: 'sdBAL',
+            checked: true,
+        },
     ]);
 
-    function updateToggleBribes(key: string) {
-        const index = bribesToClaim.findIndex((bribe) => bribe.key === key);
+    function updateToggleBribes(sdAddress: string) {
+        const index = bribesToClaim.findIndex(
+            (bribe) => bribe.sdToken === sdAddress
+        );
         const copy = [...bribesToClaim];
         copy[index].checked = !copy[index].checked;
         setBribesToClaim(copy);
@@ -94,7 +112,9 @@ export default function BribesClaiming({ className }: { className: string }) {
                         </div>
                         <Button
                             variant="outline"
-                            onClick={() => claimStakeDaoBribes(signer)}
+                            onClick={() =>
+                                claimStakeDaoBribes(signer, bribesToClaim)
+                            }
                         >
                             Claim Bribes
                         </Button>
