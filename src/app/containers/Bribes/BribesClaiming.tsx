@@ -94,7 +94,6 @@ export default function BribesClaiming({ className }: { className: string }) {
 
     return (
         <div className={className}>
-            <div className="text-4xl text-center mb-5">Bribes claiming</div>
             <div className="grid grid-cols-2 gap-12">
                 <Card>
                     <CardHeader>

@@ -9,10 +9,11 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import CheckboxList, { AddressDisplayKeyChecked } from '../CheckboxList';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { cycleTriggeringAndHarvesting } from '../../services/cycleTriggeringAndHarvesting';
 import { WalletContext } from '../../context/WalletContext';
 import { getLastEventsLiquidboost } from '@/app/services/lastDistributedRewards';
+import { Loader2 } from 'lucide-react';
 
 export default function CyclePassage({ className }: { className: string }) {
     const [stakingToProcess, setStakingToProcess] = useState([
@@ -48,6 +49,9 @@ export default function CyclePassage({ className }: { className: string }) {
         },
     ] as AddressDisplayKeyChecked[]);
 
+    const [isLoadingRewards, setIsLoadingRewards] = useState(false);
+    const [rewardsError, setRewardsError] = useState(false);
+
     const [lastRewards, setLastRewards] = useState(
         {} as {
             tokenDistributed: {
@@ -76,17 +80,28 @@ export default function CyclePassage({ className }: { className: string }) {
     }
     const { signer, provider } = useContext(WalletContext);
 
+    // A ref, not state: StrictMode invokes this effect twice against the same
+    // render's closure, so a state flag would still read `false` on the second
+    // pass. The ref is set synchronously and survives the remount.
+    const hasFetchedRewards = useRef(false);
+
     useEffect(() => {
-        if (provider) {
-            getLastEventsLiquidboost(provider).then((a) => {
-                setLastRewards(a);
-            });
+        if (!provider) {
+            hasFetchedRewards.current = false;
+            return;
         }
+        if (hasFetchedRewards.current) return;
+
+        hasFetchedRewards.current = true;
+        setIsLoadingRewards(true);
+        getLastEventsLiquidboost(provider)
+            .then(setLastRewards)
+            .catch(() => setRewardsError(true))
+            .finally(() => setIsLoadingRewards(false));
     }, [provider !== null]);
 
     return (
         <div className={className}>
-            <div className="text-4xl text-center mb-5">Cycle passage</div>
             <div className=" grid grid-cols-2 gap-12">
                 <Card>
                     <CardHeader>
@@ -124,49 +139,85 @@ export default function CyclePassage({ className }: { className: string }) {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <h1 className="text-lg font-bold ">
-                            Total : ${lastRewards?.totalUSD?.toFixed()}
-                        </h1>
-                        {lastRewards?.tokenDistributed?.map((pool, i) => (
-                            <div
-                                key={i}
-                                className="border p-4 rounded-2xl shadow-sm bg-white"
-                            >
-                                <h2 className="text-lg font-bold mb-3">
-                                    {pool.staking}
-                                </h2>
+                        {isLoadingRewards && (
+                            <div className="flex flex-col items-center justify-center gap-3 py-12 text-muted-foreground">
+                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                <p className="text-sm">
+                                    Fetching last distribution…
+                                </p>
+                            </div>
+                        )}
 
-                                <div className="grid gap-3">
-                                    {pool.rewards.map((reward, j) => (
+                        {!isLoadingRewards && rewardsError && (
+                            <p className="py-12 text-center text-sm text-destructive">
+                                Could not load the last distribution.
+                            </p>
+                        )}
+
+                        {!isLoadingRewards && !rewardsError && !provider && (
+                            <p className="py-12 text-center text-sm text-muted-foreground">
+                                Connect your wallet to see the last
+                                distribution.
+                            </p>
+                        )}
+
+                        {!isLoadingRewards && !rewardsError && provider && (
+                            <>
+                                <h1 className="text-lg font-bold ">
+                                    Total : ${lastRewards?.totalUSD?.toFixed()}
+                                </h1>
+                                {lastRewards?.tokenDistributed?.map(
+                                    (pool, i) => (
                                         <div
-                                            key={j}
-                                            className="flex justify-between items-center p-3 rounded-xl bg-gray-50"
+                                            key={i}
+                                            className="border p-4 rounded-2xl shadow-sm bg-card"
                                         >
-                                            <div>
-                                                <p className="font-medium">
-                                                    {reward.name}
-                                                </p>
-                                                <p className="text-sm text-gray-500">
-                                                    {reward.address}
-                                                </p>
-                                            </div>
+                                            <h2 className="text-lg font-bold mb-3">
+                                                {pool.staking}
+                                            </h2>
 
-                                            <div className="text-right">
-                                                {reward.amountUsd && (
-                                                    <p className="font-semibold">
-                                                        $
-                                                        {reward.amountUsd.toFixed()}
-                                                    </p>
+                                            <div className="grid gap-3">
+                                                {pool.rewards.map(
+                                                    (reward, j) => (
+                                                        <div
+                                                            key={j}
+                                                            className="flex justify-between items-center p-3 rounded-xl bg-muted"
+                                                        >
+                                                            <div>
+                                                                <p className="font-medium">
+                                                                    {
+                                                                        reward.name
+                                                                    }
+                                                                </p>
+                                                                <p className="text-sm text-muted-foreground">
+                                                                    {
+                                                                        reward.address
+                                                                    }
+                                                                </p>
+                                                            </div>
+
+                                                            <div className="text-right">
+                                                                {reward.amountUsd && (
+                                                                    <p className="font-semibold">
+                                                                        $
+                                                                        {reward.amountUsd.toFixed()}
+                                                                    </p>
+                                                                )}
+                                                                <p className=" text-sm text-muted-foreground">
+                                                                    {reward.amount.toFixed(
+                                                                        2
+                                                                    )}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    )
                                                 )}
-                                                <p className=" text-sm text-gray-500">
-                                                    {reward.amount.toFixed(2)}
-                                                </p>
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
-                        ))}
+                                    )
+                                )}
+                            </>
+                        )}
                     </CardContent>
                 </Card>
             </div>

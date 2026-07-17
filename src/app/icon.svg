@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Jessika">
+    <defs>
+        <clipPath id="frame">
+            <circle cx="32" cy="32" r="32" />
+        </clipPath>
+        <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#6B4C86" />
+            <stop offset="1" stop-color="#38284B" />
+        </linearGradient>
+        <linearGradient id="hair" x1="0.1" y1="0" x2="0.9" y2="1">
+            <stop offset="0" stop-color="#F5D57F" />
+            <stop offset="1" stop-color="#D2942C" />
+        </linearGradient>
+    </defs>
+
+    <g clip-path="url(#frame)">
+        <circle cx="32" cy="32" r="32" fill="url(#bg)" />
+
+        <!-- shoulders -->
+        <path d="M8 64C9 53 19 47.5 32 47.5S55 53 56 64Z" fill="#9B4F8E" />
+        <!-- neck -->
+        <rect x="28.5" y="37.5" width="7" height="12" rx="3.2" fill="#E0AC84" />
+
+        <!-- hair, back mass -->
+        <ellipse cx="32" cy="30" rx="17.5" ry="18.5" fill="url(#hair)" />
+
+        <!-- ears -->
+        <circle cx="20.8" cy="34" r="2.2" fill="#EFBF95" />
+        <circle cx="43.2" cy="34" r="2.2" fill="#EFBF95" />
+        <!-- face -->
+        <ellipse cx="32" cy="33.5" rx="11.6" ry="13.2" fill="#F7CFAA" />
+        <!-- earring -->
+        <circle cx="20.4" cy="38.6" r="1.5" fill="#F3E3B4" />
+
+        <!-- sunglasses -->
+        <g fill="#17161C">
+            <rect x="21.8" y="29.4" width="9.2" height="7.2" rx="3.2" />
+            <rect x="33" y="29.4" width="9.2" height="7.2" rx="3.2" />
+            <rect x="30.6" y="31.4" width="3" height="1.6" rx="0.8" />
+            <rect x="19.4" y="30.6" width="2.6" height="1.8" rx="0.9" />
+            <rect x="42" y="30.6" width="2.6" height="1.8" rx="0.9" />
+        </g>
+        <path d="M23.4 35.2 27.6 30.6h1.8L25.2 35.2Z" fill="#FFFFFF" opacity="0.22" />
+        <path d="M34.6 35.2 38.8 30.6h1.8L36.4 35.2Z" fill="#FFFFFF" opacity="0.22" />
+
+        <!-- lips -->
+        <ellipse cx="32" cy="42.4" rx="2.6" ry="1.5" fill="#C05470" />
+
+        <!-- bob, side lengths framing the face -->
+        <path d="M14.6 27.5c-0.6 8.5 0.8 15.5 3 19.1 1 1.6 3.8 1 4-1 0.4-5.6-0.2-12.6 0.6-18.6Z" fill="url(#hair)" />
+        <path d="M49.4 27.5c0.6 8.5-0.8 15.5-3 19.1-1 1.6-3.8 1-4-1-0.4-5.6 0.2-12.6-0.6-18.6Z" fill="url(#hair)" />
+        <!-- swept fringe -->
+        <path d="M32 12.5c-10 0-16 7-16.4 15.3 3.4-5.3 8.4-8 15.4-7.2 7.5 0.9 13 4 16.4 9 1.2-9.6-5-17.1-15.4-17.1Z" fill="url(#hair)" />
+        <path d="M26.2 14.6c-5 2.5-8.2 7-9 12 2.4-3.5 5.4-5.9 9-7.1Z" fill="#FAEBBE" opacity="0.7" />
+    </g>
+</svg>

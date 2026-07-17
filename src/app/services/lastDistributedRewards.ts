@@ -26,12 +26,15 @@ export async function getLastEventsLiquidboost(provider: BrowserProvider) {
         const staking = SD_STAKINGS[index]
         const url = `https://api.etherscan.io/v2/api?chainid=1&module=logs&action=getLogs&address=${staking.key}&fromBlock=${fromBlock}&toBlock=${toBlock}&page=1&offset=1000&apikey=${ETHERSCAN_API}`
 
-        await wait(500)
+        await wait(700)
         promises.push(fetch(url))
     }
 
 
-    SD_STAKINGS.push({ displayKey: "cvgCVX", key: "" })
+    // cvgCVX is fetched separately below, so it has no SD_STAKINGS entry. Pad the
+    // list locally to keep it index-aligned with `responses` — mutating the
+    // exported SD_STAKINGS would leak the padding into the next call.
+    const stakingConfigs = [...SD_STAKINGS, { displayKey: "cvgCVX", key: "" }]
 
     const responses = await Promise.all(promises)
 
@@ -39,11 +42,13 @@ export async function getLastEventsLiquidboost(provider: BrowserProvider) {
 
     responses.push(respCvgCVX)
 
+
+
     const tokenDistributed: { staking: string, rewards: { name: string, amount: number, amountUsd?: number, address: string }[] }[] = []
     const iface = new Interface(abi);
     const allRewards: string[] = []
     for (let i = 0; i < responses.length; i++) {
-        const sdTokenConfig = SD_STAKINGS[i]
+        const sdTokenConfig = stakingConfigs[i]
         const rrrr: { name: string, amount: number, address: string }[] = [];
 
         const response = await responses[i].json();
@@ -88,11 +93,13 @@ export async function getLastEventsLiquidboost(provider: BrowserProvider) {
         }
         tokenDistributed.push({ staking: sdTokenConfig.displayKey.toLowerCase(), rewards: rrrr })
     }
+    allRewards.push("0x808507121b80c02388fad14726482e061b8da827")
 
 
     const pricesDeFiLlama = await (await fetch(`https://coins.llama.fi/prices/current/${allRewards.map(a => "ethereum:" + a).join(",")}`)).json()
-    const pricesCvg = await (await fetch(`https://api.cvg.finance/asset-prices/0x5af15da84a4a6edf2d9fa6720de921e1026e37b7,0x830614aE209FF9d8706d386fcdBc7a55206fcffC,0x3E8C72655e48591d93e6dfdA16823dB0fF23d859,0xbcfE5c47129253C6B8a9A00565B3358b488D42E0,`)).json()
+    const pricesCvg = await (await fetch(`https://api.cvg.finance/asset-prices/0x5af15da84a4a6edf2d9fa6720de921e1026e37b7,0x830614aE209FF9d8706d386fcdBc7a55206fcffC,0x3E8C72655e48591d93e6dfdA16823dB0fF23d859,0xbcfE5c47129253C6B8a9A00565B3358b488D42E0,0x2191df768ad71140f9f3e96c1e4407a4aa31d082`)).json()
     let totalUSD = 0
+
     tokenDistributed.forEach(staking => {
         staking.rewards.forEach(r => {
             let price = pricesDeFiLlama.coins["ethereum:" + r.address]?.price
@@ -113,6 +120,11 @@ export async function getLastEventsLiquidboost(provider: BrowserProvider) {
             // cvgSDT
             else if (r.address.toLowerCase() === "0x830614aE209FF9d8706d386fcdBc7a55206fcffC".toLowerCase()) {
                 price = pricesCvg["0x830614aE209FF9d8706d386fcdBc7a55206fcffC"]
+            }
+
+            // cvgCVX
+            else if (r.address.toLowerCase() === "0x2191DF768ad71140F9F3E96c1e4407A4aA31d082".toLowerCase()) {
+                price = pricesCvg["0x2191DF768ad71140F9F3E96c1e4407A4aA31d082"]
             }
 
             // sPENDLE
