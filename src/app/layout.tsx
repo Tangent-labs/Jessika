@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
+// @ts-expect-error: Importing global CSS without type declarations
 import './globals.css';
 import Providers from './providers';
 

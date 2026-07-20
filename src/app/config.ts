@@ -1,3 +1,20 @@
+export const VLSDT_MULTISIG = '0x6ceE94bFCD5a7dEFDBEF337Bf79fE31D0982CF2A';
+export const BOOTSTRAPPING_MODULE = "0x2927D7D70943290529Adc517E8E2Dc1eEE7818b6"
+// Both distributors expose the same claim() / claimable() surface and are locked
+// to their REWARD_TOKEN at deployment, so symbol and decimals cannot drift.
+export const VLSDT_FEE_DISTRIBUTORS = [
+    {
+        address: '0xca94395469a88e9cac0d5e5e308910e298270d30',
+        symbol: 'USDC',
+        decimals: 6,
+    },
+    {
+        address: '0x6d57d34259f6dc31c9a241c199822861940d38f9',
+        symbol: 'SDT',
+        decimals: 18,
+    },
+];
+
 export const SD_STAKINGS = [
     {
         key: '0xF941BC649Ef0B20ABd7f6dC78CA8f8E225337933',

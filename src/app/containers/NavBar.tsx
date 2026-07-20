@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 export const menuItems = [
     { href: '/cycle', label: 'Cycle' },
     { href: '/bribes', label: 'Bribes' },
+    { href: '/multisig', label: 'Multisig' },
 ];
 
 export default function NavBar() {
@@ -22,8 +23,8 @@ export default function NavBar() {
     };
 
     return (
-        <nav className="border-b border-border px-2 mb-10">
-            <div className="container mx-auto flex flex-wrap items-center justify-between gap-4 py-4">
+        <nav className="border-b border-border px-2 mb-5">
+            <div className="container mx-auto flex flex-wrap items-center justify-between gap-4 py-2">
                 <div className="flex items-center gap-10">
                     <Link
                         href="/"

@@ -43,6 +43,5 @@ export async function cycleTriggeringAndHarvesting(
         cvgCVXStakings.push(cvgCVX_STAKING.key)
         stakingContracts = stakingContracts.filter(a => cvgCVX_STAKING.key !== a)
     }
-    console.log(stakingContracts, cvgCVXStakings)
     await cycleProcessor.cycleProcess(0, stakingContracts, cvgCVXStakings);
 }
