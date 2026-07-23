@@ -1,6 +1,22 @@
 export const VLSDT_MULTISIG = '0x6ceE94bFCD5a7dEFDBEF337Bf79fE31D0982CF2A';
 export const BOOTSTRAPPING_MODULE = "0x2927D7D70943290529Adc517E8E2Dc1eEE7818b6"
-// Both distributors expose the same claim() / claimable() surface and are locked
+
+export const VLCVX_MULTISIG = '0x11B6B453019DcdE7F0048348ff954bF29a6D6853';
+// Contract recoverTokens() is claimed from into the vlCVX multisig.
+export const CVGCVX_CONTRACT = '0x2191DF768ad71140F9F3E96c1e4407A4aA31d082';
+
+
+export const CVX = "0x4e3fbd56cd56c3e72c1403e103b45db9da5b9d2b"
+// Selectable fee tokens for the cvgCVX "Claim fees to multisig" step.
+// TODO: CRV address is a placeholder — replace with the real CRV token address.
+export const CVGCVX_FEE_TOKENS = [
+    { address: '0x4e3fbd56cd56c3e72c1403e103b45db9da5b9d2b', symbol: 'CVX', decimals: 18 },
+    { address: '0x04acaf8d2865c0714f79da09645c13fd2888977f', symbol: 'WFRAX', decimals: 18 },
+    { address: '0xD533a949740bb3306d119CC777fa900bA034cd52', symbol: 'CRV', decimals: 18 }, // TODO: placeholder, not a real address
+];
+
+// TODO: placeholder — replace with the real CVX/cvgCVX pool address once available.
+export const CVX_CVGCVX_LP = '0xc50e191f703fb3160fc15d8b168a8c740fec3666';
 // to their REWARD_TOKEN at deployment, so symbol and decimals cannot drift.
 export const VLSDT_FEE_DISTRIBUTORS = [
     {
@@ -50,6 +66,21 @@ export const cvgCVX_STAKING = {
     key: '0x2c1D293c50C6d1a4370ebb442A02c5956bbAb119'.toLowerCase(),
     displayKey: 'cvgCVX',
 }
+
+export const USG = '0xb1c2db5d6ca03fce73dbd304d320bf76c55ae1b1';
+export const sUSG = '0xf17d6f98a5c6eaa99d149079984119e0a4ef6900';
+export const FEE_TRESO_MULTI = '0x536d4e9C0944dE2aC6657d610Aa99fA5e97Ce493';
+
+// Tokens the treasury multisig can accumulate as fees, dumped to USDC then USG.
+export const USG_FEE_TOKENS = [
+    { address: '0x365accfca291e7d3914637abf1f7635db165bb09', symbol: 'FXN', decimals: 18 },
+    { address: '0xd533a949740bb3306d119cc777fa900ba034cd52', symbol: 'CRV', decimals: 18 },
+    { address: '0xd1b5651e55d4ceed36251c61c50c889b36f6abb5', symbol: 'sdCRV', decimals: 18 },
+    { address: '0xe19d1c837b8a1c83a56cd9165b2c0256d39653ad', symbol: 'sdFXN', decimals: 18 },
+    { address: '0x6c3ea9036406852006290770bedfcaba0e23a0e8', symbol: 'PYUSD', decimals: 6 },
+    { address: '0x8292bb45bf1ee4d140127049757c2e0ff06317ed', symbol: 'RLUSD', decimals: 18 },
+    { address: '0x6440f144b7e50d6a8439336510312d2f54beb01d', symbol: 'BOLD', decimals: 18 },
+];
 
 
 

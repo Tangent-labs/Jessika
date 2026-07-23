@@ -10,7 +10,8 @@ import { cn } from '@/lib/utils';
 export const menuItems = [
     { href: '/cycle', label: 'Cycle' },
     { href: '/bribes', label: 'Bribes' },
-    { href: '/multisig', label: 'Multisig' },
+    { href: '/liquidboost', label: 'LiquidBoost' },
+    { href: '/tangent', label: 'USG' },
 ];
 
 export default function NavBar() {

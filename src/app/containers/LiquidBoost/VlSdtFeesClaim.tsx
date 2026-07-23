@@ -15,7 +15,7 @@ import ApproveAndSwapStep from './ApproveAndSwapStep';
 
 export type CvgSdtStep = { quote: bigint; minAmountOut: bigint };
 
-const DEFAULT_SLIPPAGE = 1;
+const DEFAULT_SLIPPAGE = 0.5;
 
 export default function VlSdtFeesClaim() {
     const { wallet, provider } = useContext(WalletContext);
@@ -116,7 +116,7 @@ export default function VlSdtFeesClaim() {
             <CardHeader>
                 <div className="flex items-center justify-between gap-4">
                     <div>
-                        <CardTitle>vlSDT Fees Claiming</CardTitle>
+                        <CardTitle>cvgSDT process</CardTitle>
                     </div>
                     <SlippageInput slippage={slippage} onChange={setSlippage} disabled={isProposing} className="flex-shrink-0" />
                 </div>
