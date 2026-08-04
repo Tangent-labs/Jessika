@@ -1,7 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { AlertTriangle, CheckCircle2, Loader2, RefreshCw, Upload } from 'lucide-react';
+import { useCallback, useContext, useEffect, useState } from 'react';
+import { AlertTriangle, CheckCircle2, Loader2, RefreshCw, ShieldAlert, Upload, Wallet } from 'lucide-react';
+import { WalletContext } from '../../context/WalletContext';
+import { buildUploadMessage, hashBanners } from '@/lib/featureToggleAuth';
+import { useFeatureToggleAccess } from './useFeatureToggleAccess';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,6 +17,9 @@ interface FeatureToggleFormProps {
 }
 
 export default function FeatureToggleForm({ className }: FeatureToggleFormProps) {
+    const { signer, clickConnectWallet } = useContext(WalletContext);
+    const { access } = useFeatureToggleAccess();
+
     const [drafts, setDrafts] = useState<BannerDraft[]>(() => Array.from({ length: MAX_BANNERS }, emptyDraft));
 
     const [isLoading, setIsLoading] = useState(true);
@@ -22,6 +28,7 @@ export default function FeatureToggleForm({ className }: FeatureToggleFormProps)
 
     const [isConfirming, setIsConfirming] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [isSigning, setIsSigning] = useState(false);
     const [uploadError, setUploadError] = useState('');
     const [uploadedAt, setUploadedAt] = useState('');
 
@@ -72,8 +79,9 @@ export default function FeatureToggleForm({ className }: FeatureToggleFormProps)
     }, []);
 
     useEffect(() => {
+        if (access !== 'allowed') return;
         void load();
-    }, [load]);
+    }, [access, load]);
 
     const partialIndexes = drafts.map((draft, index) => ({ draft, index })).filter(({ draft }) => draftState(draft) === 'partial');
     const invalidLinkIndexes = drafts.map((draft, index) => ({ draft, index })).filter(({ draft }) => draft.link.trim() && !isValidLink(draft.link));
@@ -81,14 +89,24 @@ export default function FeatureToggleForm({ className }: FeatureToggleFormProps)
     const canUpload = !isLoading && loadingImages.length === 0 && partialIndexes.length === 0 && invalidLinkIndexes.length === 0;
 
     const upload = async () => {
+        if (!signer) {
+            setUploadError('Connect your wallet to publish');
+            return;
+        }
+
         setIsUploading(true);
         setUploadError('');
 
         try {
+            const issuedAt = new Date().toISOString();
+
+            setIsSigning(true);
+            const signature = await signer.signMessage(buildUploadMessage(hashBanners(payload), issuedAt)).finally(() => setIsSigning(false));
+
             const response = await fetch('/api/feature-toggle', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ banners: payload }),
+                body: JSON.stringify({ banners: payload, signature, issuedAt }),
             });
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || `Request failed with ${response.status}`);
@@ -96,11 +114,50 @@ export default function FeatureToggleForm({ className }: FeatureToggleFormProps)
             setIsConfirming(false);
             setUploadedAt(new Date().toLocaleTimeString());
         } catch (err) {
-            setUploadError(err instanceof Error ? err.message : 'Upload failed');
+            // Wallets surface a rejected prompt as an error; say so plainly.
+            const isRejection = err instanceof Error && /reject|denied|4001/i.test(err.message);
+            setUploadError(isRejection ? 'Signature rejected — nothing was published' : err instanceof Error ? err.message : 'Upload failed');
         } finally {
             setIsUploading(false);
         }
     };
+
+    if (access !== 'allowed') {
+        return (
+            <div className={className}>
+                <div className="container mx-auto">
+                    <Card>
+                        <CardContent className="flex flex-col items-center gap-3 p-10 text-center">
+                            {access === 'checking' && (
+                                <>
+                                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                                    <p className="text-sm text-muted-foreground">Checking access…</p>
+                                </>
+                            )}
+
+                            {access === 'disconnected' && (
+                                <>
+                                    <Wallet className="h-6 w-6 text-muted-foreground" />
+                                    <CardTitle>Connect your wallet</CardTitle>
+                                    <p className="text-sm text-muted-foreground">Feature banners can only be managed by core team wallets.</p>
+                                    <Button className="mt-2" onClick={clickConnectWallet}>
+                                        Connect Wallet
+                                    </Button>
+                                </>
+                            )}
+
+                            {access === 'denied' && (
+                                <>
+                                    <ShieldAlert className="h-6 w-6 text-destructive" />
+                                    <CardTitle>Not authorised</CardTitle>
+                                </>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className={className}>
@@ -209,7 +266,8 @@ export default function FeatureToggleForm({ className }: FeatureToggleFormProps)
                     <DialogHeader>
                         <DialogTitle>Publish to the dApp?</DialogTitle>
                         <DialogDescription>
-                            This replaces every banner currently live. {payload.length === 0 ? 'All slots are empty, so the carousel will fall back to the static Points campaign card.' : ''}
+                            This replaces every banner currently live, and needs a signature from your wallet.{' '}
+                            {payload.length === 0 ? 'All slots are empty, so the carousel will fall back to the static Points campaign card.' : ''}
                         </DialogDescription>
                     </DialogHeader>
 
@@ -230,7 +288,7 @@ export default function FeatureToggleForm({ className }: FeatureToggleFormProps)
                         </Button>
                         <Button onClick={() => void upload()} disabled={isUploading}>
                             {isUploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Confirm upload
+                            {isSigning ? 'Sign in your wallet…' : 'Confirm upload'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

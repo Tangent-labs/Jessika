@@ -6,18 +6,24 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { WalletContext } from '../context/WalletContext';
 import { cn } from '@/lib/utils';
+import { useFeatureToggleAccess } from './FeatureToggle/useFeatureToggleAccess';
 
 export const menuItems = [
     { href: '/cycle', label: 'Cycle' },
     { href: '/bribes', label: 'Bribes' },
     { href: '/liquidboost', label: 'LiquidBoost' },
     { href: '/tangent', label: 'USG' },
-    { href: '/feature-toggle', label: 'Feature toggle' },
 ];
+
+/** Only shown to allowlisted wallets; the page and upload route enforce it for real. */
+const restrictedMenuItems = [{ href: '/feature-toggle', label: 'Feature toggle' }];
 
 export default function NavBar() {
     const { clickConnectWallet, wallet } = useContext(WalletContext);
+    const { access } = useFeatureToggleAccess();
     const pathname = usePathname();
+
+    const visibleMenuItems = access === 'allowed' ? [...menuItems, ...restrictedMenuItems] : menuItems;
 
     const truncateAddress = (address: string) => {
         if (!address) return '';
@@ -28,32 +34,17 @@ export default function NavBar() {
         <nav className="border-b border-border px-2 mb-5">
             <div className="container mx-auto flex flex-wrap items-center justify-between gap-4 py-2">
                 <div className="flex items-center gap-10">
-                    <Link
-                        href="/"
-                        className="flex items-center gap-3 text-4xl font-semibold whitespace-nowrap text-primary"
-                    >
-                        <Image
-                            src="/icon.svg"
-                            alt=""
-                            width={44}
-                            height={44}
-                            unoptimized
-                            priority
-                        />
+                    <Link href="/" className="flex items-center gap-3 text-4xl font-semibold whitespace-nowrap text-primary">
+                        <Image src="/icon.svg" alt="" width={44} height={44} unoptimized priority />
                         Jessika
                     </Link>
 
                     <ul className="flex items-center gap-6">
-                        {menuItems.map(({ href, label }) => (
+                        {visibleMenuItems.map(({ href, label }) => (
                             <li key={href}>
                                 <Link
                                     href={href}
-                                    className={cn(
-                                        'text-lg font-semibold whitespace-nowrap transition-colors hover:text-foreground',
-                                        pathname === href
-                                            ? 'text-foreground'
-                                            : 'text-muted-foreground'
-                                    )}
+                                    className={cn('text-lg font-semibold whitespace-nowrap transition-colors hover:text-foreground', pathname === href ? 'text-foreground' : 'text-muted-foreground')}
                                 >
                                     {label}
                                 </Link>
@@ -62,13 +53,8 @@ export default function NavBar() {
                     </ul>
                 </div>
 
-                <button
-                    className="px-6 py-2 rounded-xl font-semibold bg-primary text-primary-foreground shadow-md transition-shadow hover:shadow-lg"
-                    onClick={clickConnectWallet}
-                >
-                    {wallet
-                        ? truncateAddress(wallet.accounts[0].address)
-                        : 'Connect Wallet'}
+                <button className="px-6 py-2 rounded-xl font-semibold bg-primary text-primary-foreground shadow-md transition-shadow hover:shadow-lg" onClick={clickConnectWallet}>
+                    {wallet ? truncateAddress(wallet.accounts[0].address) : 'Connect Wallet'}
                 </button>
             </div>
         </nav>
