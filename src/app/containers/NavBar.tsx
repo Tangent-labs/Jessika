@@ -12,6 +12,7 @@ export const menuItems = [
     { href: '/bribes', label: 'Bribes' },
     { href: '/liquidboost', label: 'LiquidBoost' },
     { href: '/tangent', label: 'USG' },
+    { href: '/feature-toggle', label: 'Feature toggle' },
 ];
 
 export default function NavBar() {
