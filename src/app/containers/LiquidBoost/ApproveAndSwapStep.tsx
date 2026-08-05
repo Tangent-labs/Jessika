@@ -2,6 +2,9 @@
 
 import { formatUnits } from 'ethers';
 import { ArrowRight } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+
+const PERCENT_PRESETS = [50, 100];
 
 function formatAmount(amount: bigint, decimals: number) {
     return Number(formatUnits(amount, decimals)).toFixed(4);
@@ -23,6 +26,11 @@ export default function ApproveAndSwapStep({
     slippage,
     priceImpact,
     fromBreakdown,
+    fromInputValue,
+    onFromInputChange,
+    fromInputError,
+    fromMaxAmount,
+    disabled,
 }: {
     step: number;
     title: string;
@@ -40,7 +48,16 @@ export default function ApproveAndSwapStep({
     priceImpact?: number;
     /** Parts that sum to `fromAmount`, listed under it. */
     fromBreakdown?: { label: string; amount: bigint }[];
+    /** When provided, `fromAmount` becomes editable and is driven by this value. */
+    fromInputValue?: string;
+    onFromInputChange?: (value: string) => void;
+    fromInputError?: string;
+    /** Basis for the percentage shortcuts next to the input. */
+    fromMaxAmount?: bigint;
+    disabled?: boolean;
 }) {
+    const isEditable = fromInputValue !== undefined && onFromInputChange !== undefined;
+
     return (
         <div className="flex gap-2">
             <div className="flex-shrink-0">
@@ -53,13 +70,62 @@ export default function ApproveAndSwapStep({
                 <p className="text-xs text-muted-foreground mb-2">{description}</p>
 
                 <div className="bg-muted p-3 rounded-lg space-y-2 border">
-                    <div className="flex justify-between">
+                    <div className="flex items-center justify-between gap-3">
                         <span className="text-sm">{fromLabel}</span>
-                        <span className="font-medium">
-                            {formatAmount(fromAmount, fromDecimals)}{' '}
-                            {fromSymbol}
-                        </span>
+                        {isEditable ? (
+                            <div className="flex items-center gap-1">
+                                {fromMaxAmount !== undefined &&
+                                    PERCENT_PRESETS.map((percent) => (
+                                        <button
+                                            key={percent}
+                                            type="button"
+                                            disabled={disabled}
+                                            onClick={() =>
+                                                onFromInputChange(
+                                                    formatUnits(
+                                                        (fromMaxAmount *
+                                                            BigInt(percent)) /
+                                                            100n,
+                                                        fromDecimals
+                                                    )
+                                                )
+                                            }
+                                            className="px-2 py-1 rounded-md text-xs font-medium border bg-transparent text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+                                        >
+                                            {percent}%
+                                        </button>
+                                    ))}
+
+                                <div className="relative w-44">
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        step="any"
+                                        disabled={disabled}
+                                        value={fromInputValue}
+                                        onChange={(event) =>
+                                            onFromInputChange(event.target.value)
+                                        }
+                                        className="h-8 pr-14 text-sm text-right [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                    />
+                                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+                                        {fromSymbol}
+                                    </span>
+                                </div>
+                            </div>
+                        ) : (
+                            <span className="font-medium">
+                                {formatAmount(fromAmount, fromDecimals)}{' '}
+                                {fromSymbol}
+                            </span>
+                        )}
                     </div>
+
+                    {fromInputError && (
+                        <p className="text-xs text-destructive text-right">
+                            {fromInputError}
+                        </p>
+                    )}
 
                     {fromBreakdown && (
                         <div className="pl-3 border-l border-muted-foreground/30 space-y-1">

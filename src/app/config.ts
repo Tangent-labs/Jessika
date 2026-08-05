@@ -1,3 +1,5 @@
+import addresses from '../../addresses.json';
+
 export const VLSDT_MULTISIG = '0x6ceE94bFCD5a7dEFDBEF337Bf79fE31D0982CF2A';
 export const BOOTSTRAPPING_MODULE = "0x2927D7D70943290529Adc517E8E2Dc1eEE7818b6"
 
@@ -70,6 +72,18 @@ export const cvgCVX_STAKING = {
 export const USG = '0xb1c2db5d6ca03fce73dbd304d320bf76c55ae1b1';
 export const sUSG = '0xf17d6f98a5c6eaa99d149079984119e0a4ef6900';
 export const FEE_TRESO_MULTI = '0x536d4e9C0944dE2aC6657d610Aa99fA5e97Ce493';
+
+// Batch pauser proxy for the USG markets. Only its owner (the Tangent DAO Safe)
+// can unpause, the pauser EOAs can only call pauseAll().
+export const PAUSER_PROXY = '0x10b1f36452e27f08b0b5747f577ff816b0e6b5fa';
+export const TANGENT_DAO_MULTI = '0x461B62CB3A7e9Df8f800aE058AE92F855F2c27Ca';
+
+// Markets come from addresses.json, the single source of truth for the deployment.
+export const USG_MARKETS = addresses.markets.map((market) => ({
+    address: market.marketAddress,
+    name: market.marketName,
+    marketType: market.marketType,
+}));
 
 // Tokens the treasury multisig can accumulate as fees, dumped to USDC then USG.
 export const USG_FEE_TOKENS = [
