@@ -33,7 +33,7 @@ const recoverTokensInterface = new Interface([
     'function recoverTokens(address[] tokens)',
 ]);
 const erc20Interface = new Interface(ERC20Abi);
-const stableSwapInterface = new Interface(StableSwapAbi);
+const cvgCvxInterface = new Interface(cvgCVXAbi);
 
 /**
  * Balances are read on the cvgCVX contract itself, since that is what
@@ -119,16 +119,17 @@ export function buildCvgCvxFeesClaimBatch(
         });
     }
 
-    // Approve + swap the accumulated CVX into cvgCVX.
+    // Approve + convert the accumulated CVX into cvgCVX. The cvgCVX contract
+    // pulls the CVX itself, so it is the spender — not the pool.
     txs.push({
         to: CVX_ADDRESS,
         value: '0',
-        data: erc20Interface.encodeFunctionData('approve', [CVX_CVGCVX_LP, totalCvx]),
+        data: erc20Interface.encodeFunctionData('approve', [CVGCVX_CONTRACT, totalCvx]),
     });
     txs.push({
-        to: CVX_CVGCVX_LP,
+        to: CVGCVX_CONTRACT,
         value: '0',
-        data: stableSwapInterface.encodeFunctionData('exchange(int128,int128,uint256,uint256,address)', [0, 1, totalCvx, cvgCvxQuote.minAmountOut, CVGCVX_CONTRACT]),
+        data: cvgCvxInterface.encodeFunctionData('convertCvxToCvgCVXWithSwap', [CVGCVX_CONTRACT, totalCvx, cvgCvxQuote.minAmountOut]),
     });
 
     return txs;

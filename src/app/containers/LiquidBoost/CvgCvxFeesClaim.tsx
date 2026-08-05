@@ -1,7 +1,7 @@
 'use client';
 
 import { useContext, useEffect, useState } from 'react';
-import { formatUnits } from 'ethers';
+import { formatUnits, parseUnits } from 'ethers';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,6 +41,10 @@ export default function CvgCvxFeesClaim() {
 
     const [slippage, setSlippage] = useState(DEFAULT_SLIPPAGE);
 
+    // Amount of CVX actually converted in step 3, as typed. Defaults to
+    // everything available, but can be lowered to keep some CVX in the Safe.
+    const [cvxAmountInput, setCvxAmountInput] = useState('0');
+
     useEffect(() => {
         if (!provider) return;
 
@@ -70,28 +74,19 @@ export default function CvgCvxFeesClaim() {
     useEffect(() => {
         if (!provider || selectedTokens.length === 0) {
             setSwapRoutes([]);
-            setCvgCvxQuote({ quote: 0n, minAmountOut: 0n });
             return;
         }
 
         // Debounced like the vlSDT card: every slippage/selection change
-        // re-quotes Enso and the pool, so `cancelled` drops stale responses.
+        // re-quotes Enso, so `cancelled` drops stale responses.
         let cancelled = false;
         const timeout = setTimeout(() => {
             setIsLoadingQuotes(true);
             setQuotesError(false);
             getCvxSwapRoutes(selectedTokens, slippage)
-                .then(async (routes) => {
+                .then((routes) => {
                     if (cancelled) return;
                     setSwapRoutes(routes);
-
-                    const cvxToken = selectedTokens.find((t) => t.symbol === 'CVX');
-                    const directCvx = cvxToken?.balance ?? 0n;
-                    const totalCvx = routes.reduce((sum, route) => sum + route.minAmountOut, directCvx);
-
-                    const quote = await getCvgCvxQuote(totalCvx, provider, slippage);
-                    if (cancelled) return;
-                    setCvgCvxQuote(quote);
                 })
                 .catch(() => {
                     if (!cancelled) setQuotesError(true);
@@ -107,6 +102,49 @@ export default function CvgCvxFeesClaim() {
         };
     }, [provider !== null, slippage, selectedAddresses]);
 
+    const cvxToken = selectedTokens.find((t) => t.symbol === 'CVX');
+    const directCvx = cvxToken?.balance ?? 0n;
+    const availableCvx = swapRoutes.reduce((sum, route) => sum + route.minAmountOut, directCvx);
+
+    // Whatever CVX becomes available is pre-filled, the user then trims it down.
+    useEffect(() => {
+        setCvxAmountInput(formatUnits(availableCvx, 18));
+    }, [availableCvx.toString()]);
+
+    let cvxAmount = 0n;
+    let cvxAmountError = '';
+    try {
+        cvxAmount = parseUnits(cvxAmountInput.trim() === '' ? '0' : cvxAmountInput.trim(), 18);
+    } catch {
+        cvxAmountError = 'Invalid amount';
+    }
+    if (!cvxAmountError && cvxAmount > availableCvx) {
+        cvxAmountError = `Only ${formatAmount(availableCvx, 18)} CVX available`;
+    }
+
+    useEffect(() => {
+        if (!provider || cvxAmount === 0n || cvxAmountError) {
+            setCvgCvxQuote({ quote: 0n, minAmountOut: 0n });
+            return;
+        }
+
+        let cancelled = false;
+        const timeout = setTimeout(() => {
+            getCvgCvxQuote(cvxAmount, provider, slippage)
+                .then((quote) => {
+                    if (!cancelled) setCvgCvxQuote(quote);
+                })
+                .catch(() => {
+                    if (!cancelled) setQuotesError(true);
+                });
+        }, 300);
+
+        return () => {
+            cancelled = true;
+            clearTimeout(timeout);
+        };
+    }, [provider !== null, slippage, cvxAmount.toString(), cvxAmountError]);
+
     function addToken(token: SelectedFeeToken) {
         setSelectedTokens((current) => [...current, token]);
     }
@@ -116,11 +154,7 @@ export default function CvgCvxFeesClaim() {
     }
 
     async function proposeClaim() {
-        if (!wallet) return;
-
-        const cvxToken = selectedTokens.find((t) => t.symbol === 'CVX');
-        const directCvx = cvxToken?.balance ?? 0n;
-        const totalCvx = swapRoutes.reduce((sum, route) => sum + route.minAmountOut, directCvx);
+        if (!wallet || cvxAmountError) return;
 
         setIsProposing(true);
         setProposeError('');
@@ -130,7 +164,7 @@ export default function CvgCvxFeesClaim() {
                 provider: wallet.provider as unknown as Eip1193Provider,
                 signerAddress: wallet.accounts[0].address,
                 safeAddress: VLCVX_MULTISIG,
-                transactions: buildCvgCvxFeesClaimBatch(selectedTokens, swapRoutes, cvgCvxQuote, totalCvx),
+                transactions: buildCvgCvxFeesClaimBatch(selectedTokens, swapRoutes, cvgCvxQuote, cvxAmount),
                 origin: 'Jessika - cvgCVX process',
             });
             setProposedTxHash(safeTxHash);
@@ -141,9 +175,6 @@ export default function CvgCvxFeesClaim() {
         }
     }
 
-    const cvxToken = selectedTokens.find((t) => t.symbol === 'CVX');
-    const directCvx = cvxToken?.balance ?? 0n;
-    const totalCvxSwapped = swapRoutes.reduce((sum, route) => sum + route.minAmountOut, directCvx);
     const cvgCvxReceived = cvgCvxQuote.quote;
     const minCvgCvxAmountOut = cvgCvxQuote.minAmountOut;
 
@@ -240,10 +271,15 @@ export default function CvgCvxFeesClaim() {
                             {/* Step 3 */}
                             <ApproveAndSwapStep
                                 step={3}
-                                title="Approve & Swap CVX to cvgCVX"
-                                description="Swap all CVX (claimed + from Enso) into cvgCVX"
+                                title="Approve & Convert CVX to cvgCVX"
+                                description="Convert CVX (claimed + from Enso) into cvgCVX via convertCvxToCvgCVXWithSwap"
                                 fromLabel="Total CVX swapped"
-                                fromAmount={totalCvxSwapped}
+                                fromAmount={cvxAmount}
+                                fromInputValue={cvxAmountInput}
+                                onFromInputChange={setCvxAmountInput}
+                                fromInputError={cvxAmountError}
+                                fromMaxAmount={availableCvx}
+                                disabled={isProposing}
                                 fromBreakdown={[
                                     ...swapRoutes.map((route) => ({
                                         label: `CVX from ${route.token.symbol}`,
@@ -263,7 +299,7 @@ export default function CvgCvxFeesClaim() {
                         </div>
 
                         <div className="pt-3 border-t">
-                            <Button variant="outline" className="w-full" disabled={!wallet || isProposing || hasNothingToClaim} onClick={proposeClaim}>
+                            <Button variant="outline" className="w-full" disabled={!wallet || isProposing || hasNothingToClaim || cvxAmount === 0n || cvxAmountError !== ''} onClick={proposeClaim}>
                                 {isProposing ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
