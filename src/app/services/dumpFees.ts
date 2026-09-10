@@ -6,6 +6,11 @@ import { computedMinAmountOut, ENSO_ROUTER } from './claimVlSdtFees';
 import { getQuoteAndRoute } from './enso';
 
 const USDC = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+/** These tokens revert on approve() when the current allowance is non-zero, so it must be reset to 0 first. */
+const APPROVE_ZERO_FIRST = new Set([
+    '0xd533a949740bb3306d119cc777fa900ba034cd52', // CRV
+    '0x365accfca291e7d3914637abf1f7635db165bb09', // FXN
+]);
 
 export type FeeToken = (typeof USG_FEE_TOKENS)[number];
 export type SelectedFeeToken = FeeToken & { balance: bigint };
@@ -76,6 +81,13 @@ export function buildDumpFeesBatch(selected: SelectedFeeToken[], swapRoutes: Fee
 
     // Approve + swap every selected fee token into USDC via Enso.
     for (const route of swapRoutes) {
+        if (APPROVE_ZERO_FIRST.has(route.token.address.toLowerCase())) {
+            txs.push({
+                to: route.token.address,
+                value: '0',
+                data: erc20Interface.encodeFunctionData('approve', [ENSO_ROUTER, 0]),
+            });
+        }
         txs.push({
             to: route.token.address,
             value: '0',
