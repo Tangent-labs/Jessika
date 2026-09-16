@@ -75,7 +75,7 @@ export const FEE_TRESO_MULTI = '0x536d4e9C0944dE2aC6657d610Aa99fA5e97Ce493';
 
 // Batch pauser proxy for the USG markets. Only its owner (the Tangent DAO Safe)
 // can unpause, the pauser EOAs can only call pauseAll().
-export const PAUSER_PROXY = '0x10b1f36452e27f08b0b5747f577ff816b0e6b5fa';
+export const PAUSER_PROXY = '0x10b1f36452e27f08B0b5747f577fF816b0E6b5fa';
 export const TANGENT_DAO_MULTI = '0x461B62CB3A7e9Df8f800aE058AE92F855F2c27Ca';
 
 // Markets come from addresses.json, the single source of truth for the deployment.
