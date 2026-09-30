@@ -9,6 +9,8 @@ import { CVGCVX_CONTRACT, CVGCVX_FEE_TOKENS, CVX, CVX_CVGCVX_LP, VLCVX_MULTISIG 
 import { computedMinAmountOut, ENSO_ROUTER } from './claimVlSdtFees';
 import { getQuoteAndRoute } from './enso';
 
+const CVX1 = "0x6c9815826fdf8c7a45ccfed2064dbab33a078712"
+
 export type CvgCvxFeeToken = (typeof CVGCVX_FEE_TOKENS)[number];
 
 export type SelectedFeeToken = CvgCvxFeeToken & { balance: bigint };
@@ -124,7 +126,7 @@ export function buildCvgCvxFeesClaimBatch(
     txs.push({
         to: CVX_ADDRESS,
         value: '0',
-        data: erc20Interface.encodeFunctionData('approve', [CVGCVX_CONTRACT, totalCvx]),
+        data: erc20Interface.encodeFunctionData('approve', [CVX1, totalCvx]),
     });
     txs.push({
         to: CVGCVX_CONTRACT,
