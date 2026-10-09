@@ -97,6 +97,8 @@ export type CvgSdtQuote = {
 
 export function buildVlSdtFeesClaimBatch(claimableFee: ClaimableFee[], USDC_To_SDT: EnsoRoute, SDT_To_cvgSDT: CvgSdtQuote, sdtBalance: bigint = BigInt(0)): MetaTransactionData[] {
 
+    if (!USDC_To_SDT.to || !USDC_To_SDT.data) throw new Error('No Enso route for USDC → SDT, refresh the quote')
+
     const usdcAmount = claimableFee[0].amount
 
     const sdtAmount = claimableFee[1].amount

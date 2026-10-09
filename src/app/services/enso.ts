@@ -36,13 +36,21 @@ export async function getEnsoData(
 ) {
     try {
         const url = `https://api.enso.finance/api/v1/shortcuts/route?chainId=1&fromAddress=${!!fromAddress ? fromAddress : receiver}&receiver=${receiver}&tokenIn=${tokenIn}&tokenOut=${tokenOut}&amountIn=${amountIn}&minAmountOut=${minAmountOut}&routingStrategy=router`
-        const response = await fetch(url, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${process.env.NEXT_ENSO_API_KEY}`,
-            },
-        })
+        // The plan is capped at 1 request/second and every quote makes two
+        // back-to-back calls, so a 429 is expected: wait and retry instead of
+        // returning a route with no tx (which crashes the batch builders).
+        let response: Response
+        for (let attempt = 0; ; attempt++) {
+            response = await fetch(url, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${process.env.NEXT_ENSO_API_KEY}`,
+                },
+            })
+            if (response.status !== 429 || attempt >= 5) break
+            await new Promise((resolve) => setTimeout(resolve, 1100))
+        }
 
         if (!response.ok) {
             throw new Error(`API request failed with status ${response.status}`)
