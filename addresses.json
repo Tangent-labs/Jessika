@@ -110,6 +110,18 @@
             "marketType": "STAKEDAO_CRV_Vault"
         },
         {
+            "marketAddress": "0x420D2D75c69331Df6ce4a1a74067D68e82670e13",
+            "marketName": "frxUSD/DUSD",
+            "collatAddress": "0x104d6a1b97A6CEf88D905d7b865A378d90be932A",
+            "marketType": "STAKEDAO_CRV_Vault"
+        },
+        {
+            "marketAddress": "0xe1065be419cacaf05477ea77a32cb33e8bcbc7da",
+            "marketName": "frxUSD/crvUSD",
+            "collatAddress": "0x13e12BB0E6A2f1A3d6901a59a9d585e89A6243e1",
+            "marketType": "STAKEDAO_CRV_Vault"
+        },
+        {
             "marketAddress": "0x849cf82e0ebcfeab8270cc5a3ea3b26cd481b754",
             "marketName": "USDC/fxUSD",
             "collatAddress": "0x5018be882dcce5e3f2f3b0913ae2096b9b3fb61f",
